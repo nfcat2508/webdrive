@@ -1,0 +1,44 @@
+<.link href={~p"/uploads/new"} class="px-6 text-sm font-semibold leading-6 text-zinc-900 sm:py-6">
+  <span class="flex w-40 items-center gap-4 sm:flex-col rounded-2xl bg-zinc-50 transition hover:bg-zinc-100 sm:hover:scale-105">
+    <.icon name="hero-arrow-up-on-square" class="h-12 w-12" />{gettext("Upload files")}
+  </span>
+</.link>
+<div class="flex flex-col gap-8">
+  <div
+    :for={{upload, index} <- Enum.with_index(@uploads)}
+    class={[
+      "text-center text-lg overflow-hidden border rounded-lg",
+      (even?(index) && "bg-cyan-100") || "bg-rose-100"
+    ]}
+  >
+    <div class="flex">
+      <div class="w-12">
+        <.icon :if={upload.encrypted} name="hero-lock-closed" class="w-7 h-7" />
+      </div>
+      <div class="grow">{truncate(upload.name)}</div>
+    </div>
+    <div class="flex justify-center space-x-8">
+      <.action_link :for={action <- @actions} upload={upload} action={action} />
+    </div>
+    <progress id={progress_id(upload.id)} value="0" class="hidden mx-auto" />
+    <.flash
+      id={error_id(upload.id)}
+      kind={:error}
+      title={gettext("Download failed")}
+      class="hidden text-left"
+    >
+      {gettext("Incorrect password maybe?")}
+    </.flash>
+    <.sharing_modal :if={:share in @actions} upload_id={upload.id} />
+    <.info_modal :if={:info in @actions} upload={upload} />
+    <.dec_pass_modal
+      :if={upload.encrypted}
+      id={"dpm#{upload.id}"}
+      subject={gettext("File is encrypted, please choose:")}
+      upload={upload}
+      url={~p"/uploads/#{upload.id}"}
+      progress_id={progress_id(upload.id)}
+      error_id={error_id(upload.id)}
+    />
+  </div>
+</div>
